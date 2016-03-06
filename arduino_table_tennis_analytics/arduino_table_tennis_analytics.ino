@@ -85,9 +85,6 @@ void setup() {
   pinMode(pin_button_B_remove, INPUT);
   
   flag_servo.attach(pin_servo);  // attaches the servo on pin 9 to the servo object
-
-  int state = httpRequest(50, 50);
-  Serial.println("http request state: " + (String) state);
 }
 
 void loop() {
@@ -344,8 +341,6 @@ void reset_game() {
   score_B = 0;
 }
 
-
-// this method makes a HTTP connection to the server:
 int httpRequest(int score_A, int score_B) {
   client.stop();
   if( request_time_state == 'LOW')
@@ -372,6 +367,11 @@ int httpRequest(int score_A, int score_B) {
       return 0;       
     }
   }
+}
+
+void send_scores_to_server() {
+  int state = httpRequest(50, 50);
+  Serial.println("http request state: " + (String) state);
 }
 
 void display_scores() {
