@@ -22,17 +22,17 @@ int score_A = 0;
 int score_B = 0;
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
   
   pinMode(RGB_led_A, OUTPUT);
   pinMode(RGB_led_B, OUTPUT);
 }
 
 void loop() {
-  if(last_table_hit - millis() < cool_down_time_out) return; 
+  if(millis() - last_table_hit < cool_down_time_out) return; 
   
-  int side_A = sense_table(side_sensor_A, 300);
-  int side_B = sense_table(side_sensor_B, 300);
+  int side_A = sense_table(side_sensor_A, 430);
+  int side_B = sense_table(side_sensor_B, 400);
   
   if (side_A == table_hit || side_B == table_hit){
     last_table_hit = millis();
@@ -41,36 +41,41 @@ void loop() {
   
   switch (state){
     case state_none:
-      Serial.println("state_none: "+ (String) score_A + ":" + (String) score_B);
+      print_state("state_none: ", score_A, score_B, side_A, side_B);
       transition_state_none(side_A, side_B, time_out);
       break;
     case state_begining_A: 
-      Serial.println("state_begining_A: "+ (String) score_A + ":" + (String) score_B);
+      print_state("state_begining_A: ", score_A, score_B, side_A, side_B);
       transition_state_begining_A(side_A, side_B, time_out);
       break;
     case state_begining_B:
-      Serial.println("state_begining_B: "+ (String) score_A + ":" + (String) score_B);
+      print_state("state_begining_B: ", score_A, score_B, side_A, side_B);
       transition_state_begining_B(side_A, side_B, time_out);
       break;
     case state_game_A:
-      Serial.println("state_game_A: "+ (String) score_A + ":" + (String) score_B);
+      print_state("state_game_A: ", score_A, score_B, side_A, side_B);
       transition_state_game_A(side_A, side_B, time_out);
       break;
     case state_game_B:
-      Serial.println("state_game_B: "+ (String) score_A + ":" + (String) score_B);
+      print_state("state_game_B: ", score_A, score_B, side_A, side_B);
       transition_state_game_B(side_A, side_B, time_out);
       break;
     default:
-      Serial.println("default: "+ (String) score_A + ":" + (String) score_B);
+      print_state("default: ", score_A, score_B, side_A, side_B);
       break;
   }
 }
 
+void print_state(String state, int score_A, int score_B, int side_A, int side_B) {
+  Serial.println(state + (String) score_A + ":" + (String) score_B + " (" + (String) side_A + ":" + (String) side_B);
+}
+
 int sense_table(int side, int calibration) {
    int sensor_value = analogRead(side);
-   
-   if (sensor_value > calibration)
+   Serial.print( sensor_value);
+   if (sensor_value > calibration) {
      return  table_hit;
+   }
    
    return  table_hit_none;
 }
