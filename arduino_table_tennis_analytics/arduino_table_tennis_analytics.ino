@@ -78,11 +78,11 @@ void setup() {
   pinMode(RGB_led_A, OUTPUT);
   pinMode(RGB_led_B, OUTPUT);
   
-  pinMode(pin_button_reset, INPUT_PULLUP);
-  pinMode(pin_button_A_add, INPUT_PULLUP);
-  pinMode(pin_button_A_remove, INPUT_PULLUP);
-  pinMode(pin_button_B_add, INPUT_PULLUP);
-  pinMode(pin_button_B_remove, INPUT_PULLUP);
+  pinMode(pin_button_reset, INPUT);
+  pinMode(pin_button_A_add, INPUT);
+  pinMode(pin_button_A_remove, INPUT);
+  pinMode(pin_button_B_add, INPUT);
+  pinMode(pin_button_B_remove, INPUT);
   
   flag_servo.attach(pin_servo);  // attaches the servo on pin 9 to the servo object
 
