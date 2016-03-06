@@ -306,6 +306,9 @@ void buttons_controller() {
   button_temp_value = digitalRead(pin_button_A_remove);
   if (button_temp_value == HIGH) {
     score_A -= 1;
+    if (score_A < 0) {
+      score_A = 0;
+    }
     update_serving_player();
   }
   
@@ -320,6 +323,9 @@ void buttons_controller() {
   button_temp_value = digitalRead(pin_button_B_remove);
   if (button_temp_value == HIGH) {
     score_B -= 1;
+    if (score_B < 0) {
+      score_B = 0;
+    }
     update_serving_player();
   }
 }
