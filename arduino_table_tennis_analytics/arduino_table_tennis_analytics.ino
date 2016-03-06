@@ -52,6 +52,8 @@ const int flag_position_player_B = 180;
 const int flag_position_player_none = 90;
 
 int button_temp_value;
+const long debounceDelay = 50;
+long lastDebounceTime = 0;
 
 int state = state_none;
 
@@ -79,11 +81,11 @@ void setup() {
   pinMode(RGB_led_A, OUTPUT);
   pinMode(RGB_led_B, OUTPUT);
   
-  pinMode(pin_button_reset, INPUT);
-  pinMode(pin_button_A_add, INPUT);
-  pinMode(pin_button_A_remove, INPUT);
-  pinMode(pin_button_B_add, INPUT);
-  pinMode(pin_button_B_remove, INPUT);
+  pinMode(pin_button_reset, INPUT_PULLUP);
+  pinMode(pin_button_A_add, INPUT_PULLUP);
+  pinMode(pin_button_A_remove, INPUT_PULLUP);
+  pinMode(pin_button_B_add, INPUT_PULLUP);
+  pinMode(pin_button_B_remove, INPUT_PULLUP);
   
   flag_servo.attach(pin_servo);  // attaches the servo on pin 9 to the servo object
 }
@@ -395,6 +397,8 @@ void detect_winner() {
     }
   }
 }
+
+
 
 
 
