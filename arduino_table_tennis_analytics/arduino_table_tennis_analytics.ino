@@ -40,8 +40,8 @@ const int side_sensor_B = 7;
 const int RGB_led_A = 53;
 const int RGB_led_B = 51;
 const int pin_button_reset = 30;
-const int pin_button_A_add = 31;
-const int pin_button_A_remove = 32;
+const int pin_button_A_add = 32;
+const int pin_button_A_remove = 31;
 const int pin_button_B_add = 33;
 const int pin_button_B_remove = 34;
 const int pin_servo = 8;
@@ -409,13 +409,13 @@ void display_scores() {
 
 void display_on_lcd(String line_top, String line_bottom) {
   lcd.setCursor(0,0);
-  lcd.print(line_top);
+  lcd.print(line_top + "              ");
   lcd.setCursor(0,1);
-  lcd.print(line_bottom);
+  lcd.print(line_bottom + "            ");
 }
 
 void detect_winner() {
-  if (score_A > game_length || score_B > game_length) {
+  if (score_A >= game_length || score_B >= game_length) {
     if (abs(score_A - score_B) >= 2) {
       send_scores_to_server();
       reset_game();
