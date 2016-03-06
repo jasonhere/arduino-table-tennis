@@ -51,6 +51,14 @@ const int flag_position_player_A = 0;
 const int flag_position_player_B = 180;
 const int flag_position_player_none = 90;
 
+
+// buttons pressed
+boolean buttonPressedReset = false;
+boolean buttonPressedAddA = false;
+boolean buttonPressedRemoveA = false;
+boolean buttonPressedAddB = false;
+boolean buttonPressedRemoveB = false;
+
 int button_temp_value;
 const long debounceDelay = 50;
 long lastDebounceTime = 0;
@@ -291,43 +299,54 @@ void buttons_controller() {
   //pin_button_reset
   button_temp_value = digitalRead(pin_button_reset);
   if (button_temp_value == LOW) {
+    buttonPressedReset = true;
+  } else if(buttonPressedReset) {
     reset_game();
-    update_serving_player();
+    buttonPressedReset = false;
   }
   
   //pin_button_A_add
   button_temp_value = digitalRead(pin_button_A_add);
   if (button_temp_value == LOW) {
+    buttonPressedAddA = true;
+  } else if (buttonPressedAddA) {
+    buttonPressedAddA = false;
     score_A += 1;
-    update_serving_player();
   }
   
   //pin_button_A_remove
   button_temp_value = digitalRead(pin_button_A_remove);
   if (button_temp_value == LOW) {
-    score_A = score_A - 1;
+    buttonPressedRemoveA = true;
+  } else if (buttonPressedRemoveA) {
+    buttonPressedRemoveA = false;
+    score_A -= 1;
     if (score_A < 0) {
       score_A = 0;
     }
-    update_serving_player();
   }
   
   //pin_button_B_add
   button_temp_value = digitalRead(pin_button_B_add);
   if (button_temp_value == LOW) {
+    buttonPressedAddB = true;
+  } else if (buttonPressedAddB) {
+    buttonPressedAddB = false;
     score_B = score_B + 1;
-    update_serving_player();
   }
   
   //pin_button_B_remove
   button_temp_value = digitalRead(pin_button_B_remove);
   if (button_temp_value == LOW) {
+    buttonPressedRemoveB = true;
+  } else if (buttonPressedRemoveB) {
+    buttonPressedRemoveB = false;
     score_B = score_B - 1;
     if (score_B < 0) {
       score_B = 0;
     }
-    update_serving_player();
   }
+  update_serving_player();
 }
 
 void flag_controller() {
