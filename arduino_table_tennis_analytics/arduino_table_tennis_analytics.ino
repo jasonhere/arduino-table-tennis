@@ -1,3 +1,5 @@
+#include <Servo.h>
+
 const int state_none = -1;
 const int state_begining_A = 0;
 const int state_begining_B = 1;
@@ -21,11 +23,14 @@ const int pin_button_A_add = 31;
 const int pin_button_A_remove = 32;
 const int pin_button_B_add = 33;
 const int pin_button_B_remove = 34;
-const int pin_servo = 8
+const int pin_servo = 8;
+
+// flag positions
+const int flag_position_player_A = 0;
+const int flag_position_player_B = 180;
+const int flag_position_player_none = 90;
 
 int button_temp_value;
-
-
 
 int state = state_none;
 
@@ -40,11 +45,21 @@ int rally_length = 0;
 int serving_player = serving_player_NA;
 int initial_serving_player = serving_player_NA;
 
+Servo flag_servo;
+
 void setup() {
   Serial.begin(115200);
   
   pinMode(RGB_led_A, OUTPUT);
   pinMode(RGB_led_B, OUTPUT);
+  
+  pinMode(pin_button_reset, INPUT_PULLUP);
+  pinMode(pin_button_A_add, INPUT_PULLUP);
+  pinMode(pin_button_A_remove, INPUT_PULLUP);
+  pinMode(pin_button_B_add, INPUT_PULLUP);
+  pinMode(pin_button_B_remove, INPUT_PULLUP);
+  
+  flag_servo.attach(pin_servo);  // attaches the servo on pin 9 to the servo object
 }
 
 void loop() {
@@ -59,9 +74,9 @@ void loop() {
   boolean time_out = (millis() - last_table_hit) > time_out_millis;
   
   scoring_state_machine(side_A, side_B, time_out);
-  serving_state();
 
   buttons_controller();
+  flag_controller();
 }
 
 void scoring_state_machine(int side_A, int side_B, boolean time_out) {
@@ -245,33 +260,53 @@ void update_serving_player() {
 
 void buttons_controller() {
   //pin_button_reset
-  button_temp_value = digital_read(pin_button_reset)
+  button_temp_value = digitalRead(pin_button_reset);
   if (button_temp_value == HIGH) {
     reset_game();
+    update_serving_player();
   }
   
   //pin_button_A_add
-  button_temp_value = digital_read(pin_button_A_add)
+  button_temp_value = digitalRead(pin_button_A_add);
   if (button_temp_value == HIGH) {
     score_A += 1;
+    update_serving_player();
   }
   
   //pin_button_A_remove
-  button_temp_value = digital_read(pin_button_A_remove)
+  button_temp_value = digitalRead(pin_button_A_remove);
   if (button_temp_value == HIGH) {
     score_A -= 1;
+    update_serving_player();
   }
   
   //pin_button_B_add
-  button_temp_value = digital_read(pin_button_B_add)
+  button_temp_value = digitalRead(pin_button_B_add);
   if (button_temp_value == HIGH) {
     score_B += 1;
+    update_serving_player();
   }
   
   //pin_button_B_remove
-  button_temp_value = digital_read(pin_button_B_remove)
+  button_temp_value = digitalRead(pin_button_B_remove);
   if (button_temp_value == HIGH) {
     score_B -= 1;
+    update_serving_player();
+  }
+}
+
+void flag_controller() {
+  switch (serving_player) {
+    case player_A:
+      flag_servo.write(flag_position_player_A);
+      break;
+    case player_B:
+      flag_servo.write(flag_position_player_B);
+      break;
+    case serving_player_NA:
+    default:
+      flag_servo.write(flag_position_player_none);
+      break;
   }
 }
 
