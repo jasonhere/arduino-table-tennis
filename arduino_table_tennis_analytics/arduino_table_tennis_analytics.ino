@@ -297,15 +297,15 @@ void buttons_controller() {
   
   //pin_button_A_add
   button_temp_value = digitalRead(pin_button_A_add);
-  if (button_temp_value == HIGH) {
+  if (button_temp_value == LOW) {
     score_A += 1;
     update_serving_player();
   }
   
   //pin_button_A_remove
   button_temp_value = digitalRead(pin_button_A_remove);
-  if (button_temp_value == HIGH) {
-    score_A -= 1;
+  if (button_temp_value == LOW) {
+    score_A = score_A - 1;
     if (score_A < 0) {
       score_A = 0;
     }
@@ -314,15 +314,15 @@ void buttons_controller() {
   
   //pin_button_B_add
   button_temp_value = digitalRead(pin_button_B_add);
-  if (button_temp_value == HIGH) {
-    score_B += 1;
+  if (button_temp_value == LOW) {
+    score_B = score_B + 1;
     update_serving_player();
   }
   
   //pin_button_B_remove
   button_temp_value = digitalRead(pin_button_B_remove);
-  if (button_temp_value == HIGH) {
-    score_B -= 1;
+  if (button_temp_value == LOW) {
+    score_B = score_B - 1;
     if (score_B < 0) {
       score_B = 0;
     }
