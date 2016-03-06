@@ -290,7 +290,7 @@ void update_serving_player() {
 void buttons_controller() {
   //pin_button_reset
   button_temp_value = digitalRead(pin_button_reset);
-  if (button_temp_value == HIGH) {
+  if (button_temp_value == LOW) {
     reset_game();
     update_serving_player();
   }
