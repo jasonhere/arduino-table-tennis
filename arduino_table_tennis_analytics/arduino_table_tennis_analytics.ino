@@ -1,4 +1,19 @@
 #include <Servo.h>
+// web client library
+#include <SPI.h>
+#include <Ethernet.h>
+
+// web client configuration
+byte mac[] = {
+  0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
+IPAddress ip(192, 168, 137, 15);
+IPAddress myDns(83, 171,22, 2);
+EthernetClient client;
+char server[] = "table-tennis-api.herokuapp.com"; 
+
+unsigned long lastConnectionTime = 0;             
+const unsigned long postingInterval = 10L * 100L; 
+boolean request_time_state = LOW;
 
 const int state_none = -1;
 const int state_begining_A = 0;
@@ -50,6 +65,8 @@ Servo flag_servo;
 void setup() {
   Serial.begin(115200);
   
+  Ethernet.begin(mac, ip, myDns);
+
   pinMode(RGB_led_A, OUTPUT);
   pinMode(RGB_led_B, OUTPUT);
   
@@ -60,6 +77,9 @@ void setup() {
   pinMode(pin_button_B_remove, INPUT_PULLUP);
   
   flag_servo.attach(pin_servo);  // attaches the servo on pin 9 to the servo object
+
+  int state = httpRequest(50, 50);
+  Serial.println("http request state: " + (String) state);
 }
 
 void loop() {
@@ -113,7 +133,6 @@ void print_state(String state, int score_A, int score_B, int side_A, int side_B)
 
 int sense_table(int side, int calibration) {
    int sensor_value = analogRead(side);
-   Serial.print( sensor_value);
    if (sensor_value > calibration) {
      return  table_hit;
    }
@@ -314,6 +333,37 @@ void reset_game() {
   serving_player = serving_player_NA;
   score_A = 0;
   score_B = 0;
+}
+
+
+// this method makes a HTTP connection to the server:
+ int httpRequest(int score_A, int score_B) {
+      client.stop();
+      if( request_time_state == 'LOW')
+      {
+         lastConnectionTime = millis();
+         request_time_state = 'HIGH';
+      }
+       if (client.connect(server, 80)) {
+ 
+      String stringOne =  String("{\"game\":{\"challenger_score\":" + String(score_A) + ",\"challenged_score\":" + String(score_B) + "}}"); 
+      String content_length = "Content-Length: ";
+      client.println("POST /v1/games HTTP/1.1");
+      client.println("Host: table-tennis-api.herokuapp.com");
+      client.println("User-Agent: arduino-ethernet");
+      client.println("Connection: keep-alive");
+      client.println("Content-Type: application/json");
+      client.println(content_length + stringOne.length());
+      client.println();
+      client.println(stringOne);
+      request_time_state = 'LOW';
+      return 1;
+  }
+      else {
+           Serial.println("connection error");
+           if (millis() - lastConnectionTime > postingInterval) 
+           return 0;       
+      }
 }
 
 
