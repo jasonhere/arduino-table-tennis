@@ -103,6 +103,7 @@ void loop() {
   buttons_controller();
   flag_controller();
   display_scores();
+  detect_winner();
 }
 
 void scoring_state_machine(int side_A, int side_B, boolean time_out) {
@@ -370,12 +371,12 @@ int httpRequest(int score_A, int score_B) {
 }
 
 void send_scores_to_server() {
-  int state = httpRequest(50, 50);
+  int state = httpRequest(score_A, score_B);
   Serial.println("http request state: " + (String) state);
 }
 
 void display_scores() {
-  dislpay_on_lcd("Player left: " + (String)score_A, "Player right: " + (String)score_B);
+  display_on_lcd("Player left: " + (String)score_A, "Player right: " + (String)score_B);
 }
 
 void display_on_lcd(String line_top, String line_bottom) {
@@ -384,6 +385,11 @@ void display_on_lcd(String line_top, String line_bottom) {
   lcd.setCursor(0,1);
   lcd.print(line_bottom);
 }
+
+void detect_winner() {
+//  if (score_A > game_length)
+}
+
 
   
 
