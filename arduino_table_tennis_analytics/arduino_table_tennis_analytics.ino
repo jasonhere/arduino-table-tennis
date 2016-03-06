@@ -3,6 +3,11 @@
 #include <SPI.h>
 #include <Ethernet.h>
 
+#include <Wire.h>  // Comes with Arduino IDE
+#include <LiquidCrystal_I2C.h>
+
+LiquidCrystal_I2C lcd(0x3F, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE);  // Set the LCD I2C address
+
 // web client configuration
 byte mac[] = {
   0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
@@ -66,6 +71,9 @@ void setup() {
   Serial.begin(115200);
   
   Ethernet.begin(mac, ip, myDns);
+  
+  lcd.begin(16,2);  
+  lcd.backlight(); 
 
   pinMode(RGB_led_A, OUTPUT);
   pinMode(RGB_led_B, OUTPUT);
@@ -97,6 +105,7 @@ void loop() {
 
   buttons_controller();
   flag_controller();
+  display_scores();
 }
 
 void scoring_state_machine(int side_A, int side_B, boolean time_out) {
@@ -337,35 +346,45 @@ void reset_game() {
 
 
 // this method makes a HTTP connection to the server:
- int httpRequest(int score_A, int score_B) {
-      client.stop();
-      if( request_time_state == 'LOW')
-      {
-         lastConnectionTime = millis();
-         request_time_state = 'HIGH';
-      }
-       if (client.connect(server, 80)) {
- 
-      String stringOne =  String("{\"game\":{\"challenger_score\":" + String(score_A) + ",\"challenged_score\":" + String(score_B) + "}}"); 
-      String content_length = "Content-Length: ";
-      client.println("POST /v1/games HTTP/1.1");
-      client.println("Host: table-tennis-api.herokuapp.com");
-      client.println("User-Agent: arduino-ethernet");
-      client.println("Connection: keep-alive");
-      client.println("Content-Type: application/json");
-      client.println(content_length + stringOne.length());
-      client.println();
-      client.println(stringOne);
-      request_time_state = 'LOW';
-      return 1;
+int httpRequest(int score_A, int score_B) {
+  client.stop();
+  if( request_time_state == 'LOW')
+  {
+    lastConnectionTime = millis();
+    request_time_state = 'HIGH';
   }
-      else {
-           Serial.println("connection error");
-           if (millis() - lastConnectionTime > postingInterval) 
-           return 0;       
-      }
+  if (client.connect(server, 80)) {
+    String stringOne =  String("{\"game\":{\"challenger_score\":" + String(score_A) + ",\"challenged_score\":" + String(score_B) + "}}"); 
+    String content_length = "Content-Length: ";
+    client.println("POST /v1/games HTTP/1.1");
+    client.println("Host: table-tennis-api.herokuapp.com");
+    client.println("User-Agent: arduino-ethernet");
+    client.println("Connection: keep-alive");
+    client.println("Content-Type: application/json");
+    client.println(content_length + stringOne.length());
+    client.println();
+    client.println(stringOne);
+    request_time_state = 'LOW';
+    return 1;
+  } else {
+    Serial.println("connection error");
+    if (millis() - lastConnectionTime > postingInterval) { 
+      return 0;       
+    }
+  }
 }
 
+void display_scores() {
+  dislpay_on_lcd("Player left: " + (String)score_A, "Player right: " + (String)score_B);
+}
 
+void display_on_lcd(String line_top, String line_bottom) {
+  lcd.setCursor(0,0);
+  lcd.print(line_top);
+  lcd.setCursor(0,1);
+  lcd.print(line_bottom);
+}
+
+  
 
 
