@@ -32,6 +32,7 @@ const int cool_down_time_out = 50;
 const int serving_player_NA = 0; // N/A
 const int player_A = 1;
 const int player_B = 2;
+const int game_length = 11;
 
 // pins
 const int side_sensor_A = 6;
@@ -387,10 +388,15 @@ void display_on_lcd(String line_top, String line_bottom) {
 }
 
 void detect_winner() {
-//  if (score_A > game_length)
+  if (score_A > game_length || score_B > game_length) {
+    if (abs(score_A - score_B) >= 2) {
+      send_scores_to_server();
+      reset_game();
+    }
+  }
 }
 
 
-  
+
 
 
