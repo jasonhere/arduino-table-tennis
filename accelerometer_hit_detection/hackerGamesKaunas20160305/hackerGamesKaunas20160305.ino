@@ -49,11 +49,6 @@ THE SOFTWARE.
 MPU6050 accelgyro;
 //MPU6050 accelgyro(0x69); // <-- use for AD0 high
 
-int16_t ax, ay, az;
-int16_t gx, gy, gz;
-
-
-
 // uncomment "OUTPUT_READABLE_ACCELGYRO" if you want to see a tab-separated
 // list of the accel X/Y/Z and then gyro X/Y/Z values in decimal. Easy to read,
 // not so easy to parse, and slow(er) over UART.
@@ -65,10 +60,21 @@ int16_t gx, gy, gz;
 // for a human.
 //#define OUTPUT_BINARY_ACCELGYRO
 
+#define sensorAThresh 15200
+#define sensorBThresh 15000
+#define delayAfterDetect 40
+#define loopDelayInUs 10
+
+//#define PRINT_DEBUG
+
 
 #define LED_PIN 13
+#define SENSORAPIN 5
+#define SENSORBPIN 6
+
 bool blinkState = false;
 bool reading = false;
+int maxAcc = 0, temp = 0;
 
 void setup() {
     // join I2C bus (I2Cdev library doesn't do this automatically)
@@ -81,18 +87,22 @@ void setup() {
     // initialize serial communication
     // (38400 chosen because it works as well at 8MHz as it does at 16MHz, but
     // it's really up to you depending on your project)
-    Serial.begin(115200);
+    #if defined PRINT_DEBUG 
+      Serial.begin(115200);
+    #endif
 
     // initialize device
     //Serial.println("Initializing I2C devices...");
     pinMode(2, OUTPUT);
     pinMode(3, OUTPUT);
+    pinMode(SENSORAPIN, OUTPUT);
+    pinMode(SENSORBPIN, OUTPUT);
     digitalWrite(2, HIGH);
     digitalWrite(3, LOW);
     accelgyro.initialize();
     
-    digitalWrite(3, HIGH);
     digitalWrite(2, LOW);
+    digitalWrite(3, HIGH);
     accelgyro.initialize();
 
     // verify connection
@@ -105,23 +115,43 @@ void setup() {
 }
 
 void loop() {
-    // read raw accel/gyro measurements from device
-    if(Serial.available()){
-      Serial.read();
-      reading = !reading;
-    }
-    digitalWrite(3, HIGH);
-    digitalWrite(2, LOW);
-    accelgyro.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
-    Serial.print(az); 
-    digitalWrite(3, LOW);
+  //Sensor A
     digitalWrite(2, HIGH);
-    Serial.print('\t');
-    accelgyro.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
-    Serial.println(az); 
-
-    // blink LED to indicate activity
-    blinkState = !blinkState;
-    digitalWrite(LED_PIN, blinkState);
-    delayMicroseconds(100);
+    digitalWrite(3, LOW);
+    //delay(1);
+    temp = accelgyro.getAccelerationZ();
+    
+    #if defined PRINT_DEBUG 
+      Serial.print(temp); 
+    #endif
+    
+    if(temp > sensorAThresh){
+      digitalWrite(SENSORAPIN, HIGH);
+      digitalWrite(LED_PIN, HIGH);
+      delay(delayAfterDetect);
+      digitalWrite(SENSORAPIN, LOW);
+      digitalWrite(LED_PIN, LOW);
+    }
+    
+    //Sensor B
+    digitalWrite(2, LOW);
+    digitalWrite(3, HIGH);
+    //delay(1);
+    
+    #if defined PRINT_DEBUG 
+      Serial.print('\t');
+    #endif
+    
+    temp = accelgyro.getAccelerationZ();
+    if(temp > sensorBThresh){
+      digitalWrite(SENSORBPIN, HIGH);
+      digitalWrite(LED_PIN, HIGH);
+      delay(delayAfterDetect);
+      digitalWrite(SENSORBPIN, LOW);
+      digitalWrite(LED_PIN, LOW);
+    }
+    #if defined PRINT_DEBUG 
+      Serial.println(temp);
+    #endif
+    delayMicroseconds(loopDelayInUs);
 }
