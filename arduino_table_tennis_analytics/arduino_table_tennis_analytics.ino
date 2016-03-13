@@ -99,20 +99,20 @@ void setup() {
 }
 
 void loop() {
-  if(millis() - last_table_hit < cool_down_time_out) return; 
-  
-  int side_A = sense_table(side_sensor_A, 430);
-  int side_B = sense_table(side_sensor_B, 400);
-  
-  if (side_A == table_hit || side_B == table_hit){
-    last_table_hit = millis();
+  if(millis() - last_table_hit > cool_down_time_out) {
+    int side_A = sense_table(side_sensor_A, 430);
+    int side_B = sense_table(side_sensor_B, 400);
+    
+    if (side_A == table_hit || side_B == table_hit){
+      last_table_hit = millis();
+    }
+    boolean time_out = (millis() - last_table_hit) > time_out_millis;
+    
+    scoring_state_machine(side_A, side_B, time_out);
   }
-  boolean time_out = (millis() - last_table_hit) > time_out_millis;
-  
-  scoring_state_machine(side_A, side_B, time_out);
 
   buttons_controller();
-  flag_controller();
+  //flag_controller();
   display_scores();
   detect_winner();
 }
@@ -141,6 +141,29 @@ void scoring_state_machine(int side_A, int side_B, boolean time_out) {
       break;
     default:
       print_state("default: ", score_A, score_B, side_A, side_B);
+      break;
+  }
+}
+
+String getStateString() {
+  switch (state){
+    case state_none:
+      return "state_none: ";
+      break;
+    case state_begining_A: 
+      return "state_begining_A: ";
+      break;
+    case state_begining_B:
+      return "state_begining_B: ";
+      break;
+    case state_game_A:
+      return "state_game_A: ";
+      break;
+    case state_game_B:
+      return "state_game_B: ";
+      break;
+    default:
+      return "default: ";
       break;
   }
 }
@@ -404,7 +427,7 @@ void send_scores_to_server() {
 }
 
 void display_scores() {
-  display_on_lcd("Player left: " + (String)score_A, "Player right: " + (String)score_B);
+  display_on_lcd((String)score_A + ":" + (String) score_B, getStateString());
 }
 
 void display_on_lcd(String line_top, String line_bottom) {
